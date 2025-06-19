@@ -4,7 +4,6 @@
   <meta charset="utf-8">
   <title>Joel</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
   <style type="text/css">
     html,
     body {
@@ -20,22 +19,143 @@
       height: 300px;
     }
 
+
+
+
     /* Your style here... */
+body {
+      font-family: monospace;
+      width: 390px;
+      height: 300px;
+      overflow: hidden;
+      position: relative;
+      color: black;
+    }
+
+#startGame {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+#levelBackground {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('background3.svg');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  z-index: 0;
+  pointer-events: none;
+}
+
+    #gameplayUI, #startScreen, #endScreen, #intermissionScreen {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+    }
+
+    #startScreen, #endScreen, #intermissionScreen {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background-repeat: no-repeat;
+      background-size: cover;
+      z-index: 2;
+    }
+
+    #startScreen { background-image: url('background1.svg'); }
+    #endScreen { background-image: url('background2.svg'); display: none; }
+    #intermissionScreen { display: none; background-color: #30ac30; z-index: 3; }
+
+    #checklist {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      text-align: left;
+    }
+
+#characterContainer {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  height: 200px;
+  width: 100%;
+  overflow: visible;
+}
+
+#character {
+  max-height: 100%;
+  height: auto;
+  width: auto;
+}
+
+
+    #buttons {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #soundButton {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+    }
+
+    #solve {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: none;
+    }
+
+    button {
+      font-size: 14px;
+      margin: 4px;
+      padding: 6px 12px;
+      cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3),
+              0 1px 2px rgba(0, 0, 0, 0.15);
+    }
   </style>
 </head>
 
 <body>
   <div id="captcha-container">
     <!-- Add your CAPTCHA here: -->
-    Hello world!
 
-    <!-- We've added a sample button. Feel free to remove it: -->
-    <button id="solve">
-      Solve!
-    </button>
+  <div id="levelBackground"></div>
+<div id="gameplayUI" style="display: none;">
+<div id="checklist"></div>
+<div id="characterContainer"><img id="character" src="" width="100" /></div>
+<div id="buttons"><button id="approve">Approve</button><button id="deny">Deny</button></div>
+<div id="soundButton"><button onclick="playSound()">🔊 Listen</button></div>
+</div>
+<div id="startScreen"><button id="startGame">Begin Verification Process</button></div>
+<div id="intermissionScreen"><img id="intermissionImage" src="" /></div>
+<div id="endScreen"><button id="solve">Complete</button></div>
+<audio id="audioPlayer"></audio>
+
+
+
+
+
   </div>
 
-  <script type="text/javascript">
+<script type="text/javascript">
     (function(window, document){
       // This is how you tell the parent window that the CAPTCHA was successful.
       function captchaSuccess() {
@@ -47,6 +167,306 @@
            .addEventListener('click', () => captchaSuccess());
 
     })(window, document);
-  </script>
+</script>
+
+
+
+
+
+
+
+<!-- all of my messy custom Javascript follows below, be advised the '128' value for total levels can be dynamically changed to whatever amount is desired -->
+
+<script>
+const TOTAL_LEVELS = 128;
+let currentLevel = 0;
+let lastApplicant = null;
+let blinkTimeout = null;
+let currentApplicant = null;
+
+const characterTypes = [
+  "crow", "gnome", "crow_with_gnome_hat", "crow_with_gnome_head"
+];
+
+const INTERESTS = {
+  crow: [
+    "nests in high places", "enjoys non-bearded costumes", "always stares into your soul",
+    "always eats standing up", "rarely dances 🪩", "prefers pecking at peanut butter"
+  ],
+  gnome: [
+    "nests in subterranean places", "enjoys bearded costumes", "sometimes stares into your soul",
+    "sometimes eats standing up", "frequently dances 🪩", "greedily schlorps peanut butter"
+  ],
+  maybe: [
+    "enjoys a good birdseed 🌱", "likes shiny objects 👀", "likes teasing and pranks", "enjoys sneakily rearranging gardens",
+    "loves to hoard 📦", "loves mushrooms 🍄, simple as.", "average arcane dabbler 🔮", "may hide in the shadows",
+    "goes for these nuts 🥜", "dines on pumpkin 🎃", "ecstatic over nougat confectionary"
+  ]
+};
+
+const BELIEFS = {
+  crowRegular: [
+    "never trust geese", "black is the best colour", "borders are limitless when you fly",
+    "shiny is shiny of course", "good vibes", "bathing for feathers is paramount", "foraging anywhere is fair game"
+  ],
+  crowDisguised: [
+    "beards are pretty awesome", "sometimes wears boots", "tends... pebble gardens",
+    "fluffs uh... 'feathers'", "pointed hats are aerodynamic",
+    "certainly does *not* eat shiny things", "believes ceramics are great friends", "foraging is best underground"
+  ],
+  gnome: [
+    "never trust an elf", "red is the best colour", "borders are cozy",
+    "shiny is sentimental", "always be punctual"
+  ],
+  maybe: [
+    "button collections are good", "pecan pie is #1", "poutine needs squeaky cheese",
+    "cats steal all the affection"
+  ]
+};
+
+
+const QUALITIES = {
+  crow: [
+    "only possesses type 1 IGF", "cannot eat avocados 🥑", "no milk 🐮", "does not have chompers",
+    "sometimes feathery", "cautious and analytical", "magically indirect",
+    "sometimes territorial", "has a luxurious coat"
+  ],
+  gnome: [
+    "possesses type 1 & 2 IGF", "consumes avocados 🥑", "produces milk 🐮", "has many sharp chompers",
+    "sometimes furry", "cautious and whimsical", "magically direct",
+    "always territorial", "wears a luxurious coat"
+  ],
+  maybe: [
+    "lays eggs 🥚", "always dips da nuggets", "sometimes scurries around", "easily distracted",
+    "highly intelligent", "has secret burrows", "hard to catch", "very loyal",
+    "cheese connoisseur 🧀", "bites when angry", "sometimes hisses at danger"
+  ]
+};
+
+const THOUGHTS = [
+  { text: "I like wearing hats", tag: "any" },
+  { text: "mushrooms taste better with friends", tag: "any" },
+  { text: "Billy Maize Corn 🌽 is the best!", tag: "any" },
+  { text: "I like high places", tag: "crow" },
+  { text: "sometimes I like to fly", tag: "crow" },
+  { text: "I avoid avocados", tag: "crow" },
+  { text: "Making mushroom soup is my favourite", tag: "gnome" },
+  { text: "egg laying is annoying ", tag: "gnome" },
+  { text: "my beard itches", tag: "gnome" }
+];
+
+const checklistDiv = document.getElementById("checklist");
+const characterImg = document.getElementById("character");
+const startScreen = document.getElementById("startScreen");
+const endScreen = document.getElementById("endScreen");
+const intermission = document.getElementById("intermissionScreen");
+const intermissionImage = document.getElementById("intermissionImage");
+const solveButton = document.getElementById("solve");
+const gameplayUI = document.getElementById("gameplayUI");
+const audioPlayer = document.getElementById("audioPlayer");
+
+document.getElementById("startGame").onclick = startGame;
+document.getElementById("approve").onclick = () => handleDecision(true);
+document.getElementById("deny").onclick = () => handleDecision(false);
+
+function startGame() {
+  currentLevel = 0;
+  lastApplicant = null;
+  checklistDiv.innerHTML = "";
+  characterImg.src = "";
+  gameplayUI.style.display = "block";
+  endScreen.style.display = "none";
+  startScreen.style.display = "none";
+  solveButton.style.display = "none";
+  generateNewApplicant();
+  randomizeButtonOrder();
+}
+
+function generateNewApplicant() {
+  let applicant;
+  do {
+    applicant = createApplicant();
+  } while (JSON.stringify(applicant) === JSON.stringify(lastApplicant));
+  lastApplicant = applicant;
+  currentApplicant = applicant;
+  renderApplicant(applicant);
+}
+function createApplicant() {
+  const imageType = characterTypes[Math.floor(Math.random() * characterTypes.length)];
+
+  const disguisedCrowImages = ["crow_with_gnome_hat", "crow_with_gnome_head"];
+  const gnomeOnlyImages = ["gnome"];
+  const crowOnlyImages = ["crow"];
+
+  let identity;
+  if (disguisedCrowImages.includes(imageType)) identity = "disguisedCrow";
+  else if (crowOnlyImages.includes(imageType)) identity = "crow";
+  else if (gnomeOnlyImages.includes(imageType)) identity = "gnome";
+  else identity = "ambiguous";
+
+  const categories = ["interests", "beliefs", "qualities"];
+  const strongCategory = categories[Math.floor(Math.random() * categories.length)];
+
+  const checklist = {};
+  for (let category of categories) {
+    if (category === strongCategory) {
+      checklist[category] = getPositiveTrait(category, identity);
+    } else {
+      checklist[category] = getMaybeTrait(category);
+    }
+  }
+
+  const validThoughts = THOUGHTS.filter(t =>
+    t.tag === identity || t.tag === "any" || identity === "disguisedCrow"
+  );
+  const thoughts = pick(validThoughts).text;
+
+  let soundFile = "ambiguous.mp3";
+  if (identity === "crow") soundFile = "crow.mp3";
+  else if (identity === "gnome") soundFile = "gnome.mp3";
+
+  const applicant = { imageType, checklist, thoughts, soundFile };
+  // console.log("🔍 Applicant:", applicant);
+  return applicant;
+}
+
+function getPositiveTrait(category, identity) {
+  if (category === "beliefs") {
+    if (identity === "crow") return pick(BELIEFS.crowRegular);
+    if (identity === "disguisedCrow") return pick(BELIEFS.crowDisguised);
+    if (identity === "gnome") return pick(BELIEFS.gnome);
+  }
+
+  const pool = category === "interests"
+    ? identity === "gnome" ? INTERESTS.gnome : INTERESTS.crow
+    : category === "qualities"
+    ? identity === "gnome" ? QUALITIES.gnome : QUALITIES.crow
+    : [];
+
+  return pick(pool);
+}
+
+
+function getMaybeTrait(category) {
+  const pool = category === "interests" ? INTERESTS.maybe
+             : category === "beliefs" ? BELIEFS.maybe
+             : QUALITIES.maybe;
+  return pick(pool);
+}
+
+function pick(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+
+function renderApplicant(applicant) {
+  checklistDiv.innerHTML = `
+    <strong>Interests:</strong> ${applicant.checklist.interests}<br/>
+    <strong>Beliefs:</strong> ${applicant.checklist.beliefs}<br/>
+    <strong>Qualities:</strong> ${applicant.checklist.qualities}<br/><br/>
+    <em>“${applicant.thoughts}”</em>
+  `;
+  characterImg.src = `${applicant.imageType}_open.svg`;
+  if (blinkTimeout) clearTimeout(blinkTimeout);
+  blinkLoop(applicant.imageType);
+}
+
+function blinkLoop(type) {
+  const blinkOnce = () => {
+    characterImg.src = `${type}_closed.svg`;
+    setTimeout(() => {
+      characterImg.src = `${type}_open.svg`;
+    }, 150);
+  };
+  const blinkTwice = () => {
+    blinkOnce();
+    setTimeout(blinkOnce, 300);
+  };
+  blinkTimeout = setTimeout(() => {
+    Math.random() < 0.25 ? blinkTwice() : blinkOnce();
+    blinkLoop(type);
+  }, Math.random() * 4000 + 1500);
+}
+
+function randomizeButtonOrder() {
+  const buttonsDiv = document.getElementById("buttons");
+  const approve = document.getElementById("approve");
+  const deny = document.getElementById("deny");
+  if (Math.random() < 0.25) {
+    buttonsDiv.innerHTML = "";
+    buttonsDiv.appendChild(deny);
+    buttonsDiv.appendChild(approve);
+  } else {
+    buttonsDiv.innerHTML = "";
+    buttonsDiv.appendChild(approve);
+    buttonsDiv.appendChild(deny);
+  }
+}
+
+function playSound() {
+  if (!currentApplicant || !currentApplicant.soundFile) return;
+
+  const audio = document.getElementById("audioPlayer");
+  audio.pause();          // stop anything currently playing
+  audio.currentTime = 0;  // rewind to start
+audio.src = currentApplicant.soundFile;
+  audio.load();           // ensure it's freshly loaded
+
+  audio.play().catch(err => {
+    console.error("Audio playback failed:", err);
+    alert("Could not play audio. Please check your browser permissions or console for errors.");
+  });
+}
+
+function handleDecision(approved) {
+clearTimeout(blinkTimeout);
+characterImg.src = "";
+//this just clears the blink animations so they don't bleed into the next screen which was happening sometimes
+  const isCorrect = evaluateApplicant(currentApplicant) === approved;
+  showIntermission(isCorrect);
+}
+
+function evaluateApplicant(applicant) {
+  const { imageType, thoughts, soundFile } = applicant;
+
+  const isDisguisedCrow =
+    ['crow_with_gnome_hat', 'crow_with_gnome_head', 'gnome', 'crow'].includes(imageType) &&
+    soundFile === 'ambiguous.mp3';
+
+  const thoughtObj = THOUGHTS.find(t => t.text === thoughts);
+  const thoughtTag = thoughtObj ? thoughtObj.tag : 'any';
+
+  // If thought is gnome-only and applicant is a crow (even in disguise), deny
+  if (thoughtTag === 'gnome' && imageType.includes('crow')) return false;
+  if (thoughtTag === 'crow' && !imageType.includes('crow')) return false;
+
+  // Accept only if it could plausibly be a crow pretending to be a gnome
+  return isDisguisedCrow && thoughtTag !== 'gnome';
+}
+
+
+function showIntermission(correct) {
+  intermission.style.display = 'flex';
+  intermissionImage.src = correct ? 'correct.svg' : 'incorrect.svg';
+
+  setTimeout(() => {
+    intermission.style.display = 'none';
+    if (correct) {
+      currentLevel++;
+      if (currentLevel >= TOTAL_LEVELS) {
+        gameplayUI.style.display = 'none';
+        endScreen.style.display = 'flex';
+        solveButton.style.display = 'block';
+      } else {
+        generateNewApplicant();
+      }
+    } else {
+      gameplayUI.style.display = 'none';
+      startScreen.style.display = 'flex';
+    }
+  }, 1200);
+}
+</script>
+
 </body>
 </html>
