@@ -70,7 +70,7 @@ body {
 
     #startScreen { background-image: url('background1.svg'); }
     #endScreen { background-image: url('background2.svg'); display: none; }
-    #intermissionScreen { display: none; background-color: #30ac30; z-index: 3; }
+    #intermissionScreen { display: none; background-color: #f9f9f9; z-index: 3; }
 
     #checklist {
       position: absolute;
@@ -81,7 +81,7 @@ body {
 
 #characterContainer {
   position: absolute;
-  bottom: 10px;
+  bottom: 5px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -101,7 +101,7 @@ body {
 
     #buttons {
       position: absolute;
-top: 100px;
+top: 98px;
       right: 10px;
       display: flex;
       flex-direction: column;
@@ -109,8 +109,8 @@ top: 100px;
 
     #soundButton {
       position: absolute;
-      bottom: 10px;
-      left: 10px;
+top: 180px;
+      right: 10px;
     }
 
     #solve {
@@ -124,8 +124,19 @@ top: 100px;
     button {
       font-size: 14px;
       margin: 4px;
-      padding: 6px 12px;
+      padding: 6px 15px;
       cursor: pointer;
+  width: 120px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3),
+              0 1px 2px rgba(0, 0, 0, 0.15);
+    }
+
+    button.main {
+      font-size: 18px;
+      margin: 4px;
+      padding: 6px 15px;
+      cursor: pointer;
+  width: 220px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3),
               0 1px 2px rgba(0, 0, 0, 0.15);
     }
@@ -142,8 +153,11 @@ top: 100px;
 <div id="characterContainer"><img id="character" src="" width="100" /></div>
 <div id="buttons"><button id="approve">Approve</button><button id="deny">Deny</button></div>
 <div id="soundButton"><button onclick="playSound()">🔊 Listen</button></div>
+
+
+
 </div>
-<div id="startScreen"><button id="startGame">Begin Verification Process</button></div>
+<div id="startScreen"><button class="main" id="startGame">Begin Verification Process</button></div>
 <div id="intermissionScreen"><img id="intermissionImage" src="" /></div>
 <div id="endScreen"><button id="solve">Complete</button></div>
 <audio id="audioPlayer"></audio>
@@ -177,7 +191,7 @@ top: 100px;
 <!-- all of my messy custom Javascript follows below, be advised the '128' value for total levels can be dynamically changed to whatever amount is desired -->
 
 <script>
-const TOTAL_LEVELS = 128;
+const TOTAL_LEVELS = 64;
 let currentLevel = 0;
 let lastApplicant = null;
 let blinkTimeout = null;
@@ -278,7 +292,6 @@ function startGame() {
   startScreen.style.display = "none";
   solveButton.style.display = "none";
   generateNewApplicant();
-  randomizeButtonOrder();
 }
 
 function generateNewApplicant() {
@@ -289,6 +302,7 @@ function generateNewApplicant() {
   lastApplicant = applicant;
   currentApplicant = applicant;
   renderApplicant(applicant);
+randomizeButtonOrder();
 }
 function createApplicant() {
   const imageType = characterTypes[Math.floor(Math.random() * characterTypes.length)];
@@ -297,11 +311,18 @@ function createApplicant() {
   const gnomeOnlyImages = ["gnome"];
   const crowOnlyImages = ["crow"];
 
-  let identity;
-  if (disguisedCrowImages.includes(imageType)) identity = "disguisedCrow";
-  else if (crowOnlyImages.includes(imageType)) identity = "crow";
-  else if (gnomeOnlyImages.includes(imageType)) identity = "gnome";
-  else identity = "ambiguous";
+let identity;
+if (disguisedCrowImages.includes(imageType)) {
+  // 80% chance it's a disguised crow, 20% chance it's a gnome
+  identity = Math.random() < 0.8 ? "disguisedCrow" : "gnome";
+} else if (crowOnlyImages.includes(imageType)) {
+  identity = "crow";
+} else if (gnomeOnlyImages.includes(imageType)) {
+  identity = "gnome";
+} else {
+  identity = "ambiguous";
+}
+
 
   const categories = ["interests", "beliefs", "qualities"];
   const strongCategory = categories[Math.floor(Math.random() * categories.length)];
@@ -320,12 +341,12 @@ function createApplicant() {
   );
   const thoughts = pick(validThoughts).text;
 
-  let soundFile = "ambiguous.mp3";
-  if (identity === "crow") soundFile = "crow.mp3";
-  else if (identity === "gnome") soundFile = "gnome.mp3";
+let soundFile = "ambiguous.mp3";
+if (identity === "crow") soundFile = "crow.mp3";
+else if (identity === "gnome") soundFile = "gnome.mp3";
+else if (identity === "disguisedCrow") soundFile = "crow.mp3";
 
-  const applicant = { imageType, checklist, thoughts, soundFile };
-  // console.log("🔍 Applicant:", applicant);
+const applicant = { imageType, checklist, thoughts, soundFile, identity };
   return applicant;
 }
 
@@ -391,6 +412,7 @@ function randomizeButtonOrder() {
   const buttonsDiv = document.getElementById("buttons");
   const approve = document.getElementById("approve");
   const deny = document.getElementById("deny");
+
   if (Math.random() < 0.25) {
     buttonsDiv.innerHTML = "";
     buttonsDiv.appendChild(deny);
@@ -426,27 +448,15 @@ characterImg.src = "";
 }
 
 function evaluateApplicant(applicant) {
-  const { imageType, thoughts, soundFile } = applicant;
-
-  const isDisguisedCrow =
-    ['crow_with_gnome_hat', 'crow_with_gnome_head', 'gnome', 'crow'].includes(imageType) &&
-    soundFile === 'ambiguous.mp3';
-
-  const thoughtObj = THOUGHTS.find(t => t.text === thoughts);
-  const thoughtTag = thoughtObj ? thoughtObj.tag : 'any';
-
-  // If thought is gnome-only and applicant is a crow (even in disguise), deny
-  if (thoughtTag === 'gnome' && imageType.includes('crow')) return false;
-  if (thoughtTag === 'crow' && !imageType.includes('crow')) return false;
-
-  // Accept only if it could plausibly be a crow pretending to be a gnome
-  return isDisguisedCrow && thoughtTag !== 'gnome';
+  return applicant.identity === "crow" || applicant.identity === "disguisedCrow";
 }
 
 
 function showIntermission(correct) {
   intermission.style.display = 'flex';
   intermissionImage.src = correct ? 'correct.svg' : 'incorrect.svg';
+
+  const duration = correct ? 400 : 2200;
 
   setTimeout(() => {
     intermission.style.display = 'none';
@@ -463,7 +473,7 @@ function showIntermission(correct) {
       gameplayUI.style.display = 'none';
       startScreen.style.display = 'flex';
     }
-  }, 1200);
+  }, duration);
 }
 </script>
 
