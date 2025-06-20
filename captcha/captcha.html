@@ -19,127 +19,27 @@
       height: 300px;
     }
 
-
-
-
     /* Your style here... */
-body {
-      width: 390px;
-      height: 300px;
-      overflow: hidden;
-      position: relative;
-      color: black;
-    }
+body {width: 390px;height: 300px;overflow: hidden;position: relative;color: black;}#startGame {position: absolute;top: 10px;left: 50%;transform: translateX(-50%);}#levelBackground {position: fixed;top: 0;left: 0;width: 100%;height: 100%;background-image: url('background3.svg');background-size: cover;background-repeat: no-repeat;background-position: center;z-index: 0;pointer-events: none;}#gameplayUI, #startScreen, #endScreen, #intermissionScreen {position: absolute;width: 100%;height: 100%;}#startScreen, #endScreen, #intermissionScreen {display: flex;flex-direction: column;justify-content: center;align-items: center;background-repeat: no-repeat;background-size: cover;z-index: 2;}#startScreen { background-image: url('background1.svg'); }#endScreen { background-image: url('background2.svg'); display: none; }#intermissionScreen { display: none; background-color: #f9f9f9; z-index: 3; }#checklist {position: absolute;top: 10px;left: 10px;text-align: left;}#characterContainer {position: absolute;bottom: 5px;left: 50%;transform: translateX(-50%);display: flex;justify-content: center;align-items: flex-end;height: 200px;width: 100%;overflow: visible;}#character {max-height: 100%;height: auto;width: auto;}#buttons {position: absolute;top: 95px;right: 10px;display: flex;flex-direction: column;}#soundButton {position: absolute;top: 180px;right: 10px;}#solve {position: absolute;top: 10px;left: 50%;transform: translateX(-50%);display: none;}button {font-size: 14px;margin: 4px;padding: 6px 15px;cursor: pointer;width: 120px;box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3),0 1px 2px rgba(0, 0, 0, 0.15);}button.main {font-size: 18px;margin: 4px;padding: 6px 15px;cursor: pointer;width: 220px;box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3),0 1px 2px rgba(0, 0, 0, 0.15);}
 
-#startGame {
-  position: absolute;
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-#levelBackground {
+#progressContainer {
+  width: 100%;
+  height: 6px;
+  background-color: #4d4d4d; /* or match your game's “sand” tone */
+  display: none;
   position: fixed;
-  top: 0;
+  bottom: 0;
   left: 0;
-  width: 100%;
+  z-index: 999;
+}
+
+#progressBar {
   height: 100%;
-  background-image: url('background3.svg');
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center;
-  z-index: 0;
-  pointer-events: none;
+  width: 0%;
+  background-color: #00ff00; /* match sand color */
+  transition: width 0.3s ease;
 }
 
-    #gameplayUI, #startScreen, #endScreen, #intermissionScreen {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-    }
-
-    #startScreen, #endScreen, #intermissionScreen {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      background-repeat: no-repeat;
-      background-size: cover;
-      z-index: 2;
-    }
-
-    #startScreen { background-image: url('background1.svg'); }
-    #endScreen { background-image: url('background2.svg'); display: none; }
-    #intermissionScreen { display: none; background-color: #f9f9f9; z-index: 3; }
-
-    #checklist {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      text-align: left;
-    }
-
-#characterContainer {
-  position: absolute;
-  bottom: 5px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  height: 200px;
-  width: 100%;
-  overflow: visible;
-}
-
-#character {
-  max-height: 100%;
-  height: auto;
-  width: auto;
-}
-
-
-    #buttons {
-      position: absolute;
-top: 98px;
-      right: 10px;
-      display: flex;
-      flex-direction: column;
-    }
-
-    #soundButton {
-      position: absolute;
-top: 180px;
-      right: 10px;
-    }
-
-    #solve {
-      position: absolute;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: none;
-    }
-
-    button {
-      font-size: 14px;
-      margin: 4px;
-      padding: 6px 15px;
-      cursor: pointer;
-  width: 120px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3),
-              0 1px 2px rgba(0, 0, 0, 0.15);
-    }
-
-    button.main {
-      font-size: 18px;
-      margin: 4px;
-      padding: 6px 15px;
-      cursor: pointer;
-  width: 220px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3),
-              0 1px 2px rgba(0, 0, 0, 0.15);
-    }
   </style>
 </head>
 
@@ -147,26 +47,25 @@ top: 180px;
   <div id="captcha-container">
     <!-- Add your CAPTCHA here: -->
 
-  <div id="levelBackground"></div>
+
+
+<div id="levelBackground"></div>
+
 <div id="gameplayUI" style="display: none;">
-<div id="checklist"></div>
-<div id="characterContainer"><img id="character" src="" width="100" /></div>
-<div id="buttons"><button id="approve">Approve</button><button id="deny">Deny</button></div>
-<div id="soundButton"><button onclick="playSound()">🔊 Listen</button></div>
-
-
-
+  <div id="checklist"></div>
+  <div id="characterContainer"><img id="character" src="" width="100" /></div>
+  <div id="buttons"><button id="approve">✅ Approve</button><button id="deny">❌ Deny</button></div>
+  <div id="soundButton"><button onclick="playSound()">🔊 Listen</button></div>
 </div>
+
 <div id="startScreen"><button class="main" id="startGame">Begin Verification Process</button></div>
 <div id="intermissionScreen"><img id="intermissionImage" src="" /></div>
 <div id="endScreen"><button id="solve">Complete</button></div>
 <audio id="audioPlayer"></audio>
 
 
+<div id="progressContainer"><div id="progressBar"></div></div>
 
-
-
-  </div>
 
 <script type="text/javascript">
     (function(window, document){
@@ -188,7 +87,7 @@ top: 180px;
 
 
 
-<!-- all of my messy custom Javascript follows below, be advised the '128' value for total levels can be dynamically changed to whatever amount is desired -->
+<!-- all of my messy custom Javascript follows below, be advised the '64' value for total levels can be dynamically changed to whatever amount is desired -->
 
 <script>
 const TOTAL_LEVELS = 64;
@@ -236,7 +135,6 @@ const BELIEFS = {
     "cats steal all the affection"
   ]
 };
-
 
 const QUALITIES = {
   crow: [
@@ -291,6 +189,9 @@ function startGame() {
   endScreen.style.display = "none";
   startScreen.style.display = "none";
   solveButton.style.display = "none";
+  const bar = document.getElementById("progressContainer");
+  if (bar) bar.style.display = "block";
+  updateProgressBar();
   generateNewApplicant();
 }
 
@@ -302,52 +203,47 @@ function generateNewApplicant() {
   lastApplicant = applicant;
   currentApplicant = applicant;
   renderApplicant(applicant);
-randomizeButtonOrder();
+  randomizeButtonOrder();
 }
+
 function createApplicant() {
   const imageType = characterTypes[Math.floor(Math.random() * characterTypes.length)];
-
   const disguisedCrowImages = ["crow_with_gnome_hat", "crow_with_gnome_head"];
   const gnomeOnlyImages = ["gnome"];
   const crowOnlyImages = ["crow"];
 
-let identity;
-if (disguisedCrowImages.includes(imageType)) {
-  // 80% chance it's a disguised crow, 20% chance it's a gnome
-  identity = Math.random() < 0.8 ? "disguisedCrow" : "gnome";
-} else if (crowOnlyImages.includes(imageType)) {
-  identity = "crow";
-} else if (gnomeOnlyImages.includes(imageType)) {
-  identity = "gnome";
-} else {
-  identity = "ambiguous";
-}
-
+  let identity;
+  if (disguisedCrowImages.includes(imageType)) {
+    identity = Math.random() < 0.8 ? "disguisedCrow" : "gnome";
+  } else if (crowOnlyImages.includes(imageType)) {
+    identity = "crow";
+  } else if (gnomeOnlyImages.includes(imageType)) {
+    identity = "gnome";
+  } else {
+    identity = "ambiguous";
+  }
 
   const categories = ["interests", "beliefs", "qualities"];
   const strongCategory = categories[Math.floor(Math.random() * categories.length)];
 
   const checklist = {};
   for (let category of categories) {
-    if (category === strongCategory) {
-      checklist[category] = getPositiveTrait(category, identity);
-    } else {
-      checklist[category] = getMaybeTrait(category);
-    }
+    checklist[category] =
+      category === strongCategory
+        ? getPositiveTrait(category, identity)
+        : getMaybeTrait(category);
   }
 
   const validThoughts = THOUGHTS.filter(t =>
-    t.tag === identity || t.tag === "any" || identity === "disguisedCrow"
+    identity === "disguisedCrow"
+      ? t.tag === "crow" || t.tag === "any"
+      : t.tag === identity || t.tag === "any"
   );
   const thoughts = pick(validThoughts).text;
 
-let soundFile = "ambiguous.mp3";
-if (identity === "crow") soundFile = "crow.mp3";
-else if (identity === "gnome") soundFile = "gnome.mp3";
-else if (identity === "disguisedCrow") soundFile = "crow.mp3";
+  const soundFile = identity === "gnome" ? "gnome.mp3" : "crow.mp3";
 
-const applicant = { imageType, checklist, thoughts, soundFile, identity };
-  return applicant;
+  return { imageType, checklist, thoughts, soundFile, identity };
 }
 
 function getPositiveTrait(category, identity) {
@@ -366,7 +262,6 @@ function getPositiveTrait(category, identity) {
   return pick(pool);
 }
 
-
 function getMaybeTrait(category) {
   const pool = category === "interests" ? INTERESTS.maybe
              : category === "beliefs" ? BELIEFS.maybe
@@ -377,7 +272,6 @@ function getMaybeTrait(category) {
 function pick(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
-
 
 function renderApplicant(applicant) {
   checklistDiv.innerHTML = `
@@ -413,12 +307,11 @@ function randomizeButtonOrder() {
   const approve = document.getElementById("approve");
   const deny = document.getElementById("deny");
 
+  buttonsDiv.innerHTML = "";
   if (Math.random() < 0.25) {
-    buttonsDiv.innerHTML = "";
     buttonsDiv.appendChild(deny);
     buttonsDiv.appendChild(approve);
   } else {
-    buttonsDiv.innerHTML = "";
     buttonsDiv.appendChild(approve);
     buttonsDiv.appendChild(deny);
   }
@@ -427,22 +320,20 @@ function randomizeButtonOrder() {
 function playSound() {
   if (!currentApplicant || !currentApplicant.soundFile) return;
 
-  const audio = document.getElementById("audioPlayer");
-  audio.pause();          // stop anything currently playing
-  audio.currentTime = 0;  // rewind to start
-audio.src = currentApplicant.soundFile;
-  audio.load();           // ensure it's freshly loaded
+  audioPlayer.pause();
+  audioPlayer.currentTime = 0;
+  audioPlayer.src = currentApplicant.soundFile;
+  audioPlayer.load();
 
-  audio.play().catch(err => {
+  audioPlayer.play().catch(err => {
     console.error("Audio playback failed:", err);
-    alert("Could not play audio. Please check your browser permissions or console for errors.");
+    alert("Could not play audio. Please check your browser permissions.");
   });
 }
 
 function handleDecision(approved) {
-clearTimeout(blinkTimeout);
-characterImg.src = "";
-//this just clears the blink animations so they don't bleed into the next screen which was happening sometimes
+  clearTimeout(blinkTimeout);
+  characterImg.src = "";
   const isCorrect = evaluateApplicant(currentApplicant) === approved;
   showIntermission(isCorrect);
 }
@@ -451,6 +342,13 @@ function evaluateApplicant(applicant) {
   return applicant.identity === "crow" || applicant.identity === "disguisedCrow";
 }
 
+function updateProgressBar() {
+  const bar = document.getElementById("progressBar");
+  if (bar) {
+    const percent = (currentLevel / TOTAL_LEVELS) * 100;
+    bar.style.width = percent + "%";
+  }
+}
 
 function showIntermission(correct) {
   intermission.style.display = 'flex';
@@ -462,19 +360,25 @@ function showIntermission(correct) {
     intermission.style.display = 'none';
     if (correct) {
       currentLevel++;
+      updateProgressBar();
       if (currentLevel >= TOTAL_LEVELS) {
         gameplayUI.style.display = 'none';
         endScreen.style.display = 'flex';
         solveButton.style.display = 'block';
+        const bar = document.getElementById("progressContainer");
+        if (bar) bar.style.display = "none";
       } else {
         generateNewApplicant();
       }
     } else {
       gameplayUI.style.display = 'none';
       startScreen.style.display = 'flex';
+      const bar = document.getElementById("progressContainer");
+      if (bar) bar.style.display = "none";
     }
   }, duration);
 }
+
 </script>
 
 </body>
